@@ -119,8 +119,8 @@ fun HomeScreen(navController: NavController, viewModel: ColorWiseViewModel) {
                 Icon(
                     painter = painterResource(id = R.drawable.logocolorwise),
                     contentDescription = "Logo Color Wise",
-                    tint = Color.White,
-                    modifier = Modifier.size(64.dp)
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(80.dp)
                 )
             }
 

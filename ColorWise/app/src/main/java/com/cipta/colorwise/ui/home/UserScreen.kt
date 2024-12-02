@@ -101,7 +101,7 @@ fun InputScreen(onNextClicked: () -> Unit, viewModel: ColorWiseViewModel = viewM
                 Text(
                     text = errorMessage.ifEmpty { "Nama harus diisi." },
                     fontSize = 12.sp,
-                    color = Color.White
+                    color = Color.Red
                 )
             }
 
@@ -115,6 +115,7 @@ fun InputScreen(onNextClicked: () -> Unit, viewModel: ColorWiseViewModel = viewM
                         isNameEmpty = true
                         errorMessage = "Nama harus diisi."
                     } else {
+                        // Simpan nama pengguna ke ViewModel dan SharedPreferences
                         viewModel.setUserName(name.value.text)
                         onNextClicked()
                     }
@@ -122,6 +123,7 @@ fun InputScreen(onNextClicked: () -> Unit, viewModel: ColorWiseViewModel = viewM
                 modifier = Modifier
                     .padding(top = 16.dp)
             )
+
         }
     }
 }
