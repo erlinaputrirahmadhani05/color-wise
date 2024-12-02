@@ -1,4 +1,4 @@
-package com.cipta.colorwise.ui.home
+package com.cipta.colorwise.ui.test
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,11 +26,12 @@ import com.cipta.colorwise.R
 import com.cipta.colorwise.data.QuestionEntity
 import com.cipta.colorwise.data.QuestionRepository
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun TestScreen(
     context: Context,
-    navController: NavController, // NavController untuk navigasi
+    navController: NavController,
     totalQuestions: Int = 10,
     correctAnswer: String
 ) {
@@ -38,7 +40,7 @@ fun TestScreen(
     var currentIndex by remember { mutableStateOf(0) }
     var currentQuestion by remember { mutableStateOf<QuestionEntity?>(null) }
     var answer by remember { mutableStateOf(TextFieldValue("")) }
-    var correctAnswers by remember { mutableStateOf(0) } // Menyimpan jawaban benar
+    var correctAnswers by remember { mutableStateOf(0) }
     var errorMessage by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -80,7 +82,8 @@ fun TestScreen(
                 brush = androidx.compose.ui.graphics.Brush.verticalGradient(
                     colors = listOf(Color(0xFF2C1E73), Color(0xFF512DA8))
                 )
-            ),
+            )
+            .imePadding(), // Menambahkan padding untuk menghindari penutupan dengan keyboard
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -93,17 +96,16 @@ fun TestScreen(
                 .align(Alignment.End)
                 .padding(end = 16.dp, bottom = 16.dp)
                 .background(
-                    color = Color.Transparent, // Warna latar transparan
-                    shape = RoundedCornerShape(50) // Sudut melengkung
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(50)
                 )
                 .border(
                     width = 2.dp,
-                    color = Color.White, // Warna garis putih
-                    shape = RoundedCornerShape(50) // Bentuk sudut melengkung
+                    color = Color.White,
+                    shape = RoundedCornerShape(50)
                 )
-                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding untuk spasi dalam border
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         )
-
 
         // Gambar soal
         currentQuestion?.let { question ->
@@ -132,13 +134,16 @@ fun TestScreen(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(50.dp) // Sama dengan tinggi tombol
+                    .height(50.dp)
                     .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .padding(horizontal = 8.dp, vertical = 12.dp) // Posisikan teks dalam box
+                    .padding(horizontal = 8.dp, vertical = 12.dp)
             ) {
                 BasicTextField(
                     value = answer,
                     onValueChange = { onAnswerChanged(it) },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    ), // Menambahkan keyboard number field
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 8.dp),
@@ -151,32 +156,35 @@ fun TestScreen(
             // Tombol berupa ikon
             Button(
                 onClick = {
-                    coroutineScope.launch {
-                        // Cek jawaban benar
-                        if (currentQuestion?.answer?.toIntOrNull() == answer.text.toIntOrNull()) {
-                            correctAnswers++
+                    if (answer.text.isEmpty()) {
+                        errorMessage = "Silakan masukkan jawaban terlebih dahulu."
+                    } else if (isValidNumber(answer.text)) {
+                        coroutineScope.launch {
+                            if (currentQuestion?.answer?.toIntOrNull() == answer.text.toIntOrNull()) {
+                                correctAnswers++
+                            }
+
+                            if (currentIndex < totalQuestions - 1) {
+                                currentIndex++
+                                answer = TextFieldValue("")
+                                currentQuestion = repository.getQuestionById(questionIds[currentIndex])
+                            } else {
+                                navController.navigate("hasilTestScreen/$totalQuestions/$correctAnswers")
+                            }
                         }
-                        if (currentIndex < totalQuestions - 1) {
-                            // Ke soal berikutnya
-                            currentIndex++
-                            answer = TextFieldValue("") // Reset jawaban
-                            currentQuestion = repository.getQuestionById(questionIds[currentIndex])
-                        } else {
-                            // Navigasi ke layar hasil
-                            navController.navigate("hasilTestScreen/$totalQuestions/$correctAnswers")
-                        }
+                    } else {
+                        errorMessage = "Input hanya boleh berupa angka."
                     }
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFA4A4A6)),
-                        enabled = isValidNumber(answer.text),
+                enabled = answer.text.isNotEmpty() && isValidNumber(answer.text),
                 modifier = Modifier
-                    .size(50.dp) // Ukuran tombol
+                    .size(50.dp)
             ) {
-                // Ikon berupa gambar >
                 Icon(
-                    painter = painterResource(id = R.drawable.button), // Pastikan Anda memiliki ikon ini
+                    painter = painterResource(id = R.drawable.button),
                     contentDescription = "Next",
-                    tint = Color.Black, // Warna ikon
+                    tint = Color.Black,
                     modifier = Modifier.size(34.dp)
                 )
             }

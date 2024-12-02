@@ -34,6 +34,7 @@ fun HasilTestScreen(
     // Warna tombol
     val RedOrange = Color(0xFFF94F52)
     val LightPink = Color(0xFFF472B6)
+    val SkyBlue = Color(0xFF15C8DB)
 
     Box(
         modifier = Modifier
@@ -126,12 +127,12 @@ fun HasilTestScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = RedOrange),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
-                        .width(160.dp)
-                        .height(60.dp)
+                        .width(120.dp)  // Ukuran lebih kecil
+                        .height(48.dp)  // Ukuran lebih kecil
                 ) {
                     Text(
                         text = "Back",
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,  // Ukuran font sedikit lebih kecil
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -143,27 +144,42 @@ fun HasilTestScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = LightPink),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
-                        .width(160.dp)
-                        .height(60.dp)
+                        .width(120.dp)  // Ukuran lebih kecil
+                        .height(48.dp)  // Ukuran lebih kecil
                 ) {
                     Text(
                         text = "Dokter",
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,  // Ukuran font sedikit lebih kecil
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Tombol ke Riwayat Hasil
-            GradientButton(
-                text = "Lihat Riwayat Hasil",
-                colors = listOf(Color(0xFF7A4BFF), Color(0xFFB388FF)),
+            Button(
                 onClick = {
                     // Navigasi ke Riwayat Hasil dengan data yang diteruskan
                     navController.navigate("riwayathasil/$totalQuestions/$correctAnswers")
-                }
-            )
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = SkyBlue),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth() // Mengisi lebar layar agar tombol cukup besar
+                    .padding(horizontal = 32.dp) // Padding kiri-kanan untuk keseimbangan
+                    .height(60.dp) // Tinggi tombol tetap proporsional
+            ) {
+                Text(
+                    text = "Lihat Riwayat Hasil",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 1, // Membatasi teks ke satu baris
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
