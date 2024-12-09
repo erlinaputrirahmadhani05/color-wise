@@ -1,6 +1,5 @@
 package com.cipta.colorwise.ui.navigation
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -12,26 +11,33 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.cipta.colorwise.ui.home.*
 import com.cipta.colorwise.ui.test.TestScreen
+import com.cipta.colorwise.viewmodel.ColorWiseViewModel
+
 @Composable
 fun NavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: ColorWiseViewModel = viewModel()  // ViewModel untuk InputScreen
+    viewModel: ColorWiseViewModel = viewModel() // Shared ViewModel untuk seluruh navigasi
 ) {
     val context = LocalContext.current
 
-    NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
-        // SplashScreen
+    NavHost(
+        navController = navController,
+        startDestination = "splash",
+        modifier = modifier
+    ) {
+        // Splash Screen
         composable("splash") {
-            SplashScreen(onSplashFinished = {
-                // Pindah ke halaman berikutnya setelah splash screen selesai
-                navController.navigate("input") {
-                    popUpTo("splash") { inclusive = true }  // Hapus SplashScreen dari stack
+            SplashScreen(
+                onSplashFinished = {
+                    navController.navigate("input") {
+                        popUpTo("splash") { inclusive = true }
+                    }
                 }
-            })
+            )
         }
 
-        // InputScreen
+        // Input Screen
         composable("input") {
             InputScreen(
                 onNextClicked = {
@@ -43,7 +49,7 @@ fun NavGraph(
             )
         }
 
-        // HomeScreen
+        // Home Screen
         composable("home") {
             HomeScreen(
                 navController = navController,
@@ -51,14 +57,14 @@ fun NavGraph(
             )
         }
 
-        // SplashTestScreen
+        // Splash Test Screen
         composable("splashtest") {
             SplashTest(navController = navController)
         }
 
-        // TestScreen
+        // Test Screen
         composable("test") {
-            val correctAnswer = "jawaban benar"
+            val correctAnswer = "jawaban benar" // Sesuaikan jika dinamis
             val totalQuestions = 10
             TestScreen(
                 context = context,
@@ -68,7 +74,7 @@ fun NavGraph(
             )
         }
 
-        // HasilTestScreen rute
+        // Hasil Test Screen
         composable(
             route = "hasiltestscreen/{totalQuestions}/{correctAnswers}",
             arguments = listOf(
@@ -79,7 +85,6 @@ fun NavGraph(
             val totalQuestions = backStackEntry.arguments?.getInt("totalQuestions") ?: 0
             val correctAnswers = backStackEntry.arguments?.getInt("correctAnswers") ?: 0
 
-            // Pastikan navController diteruskan ke HasilTestScreen
             HasilTestScreen(
                 totalQuestions = totalQuestions,
                 correctAnswers = correctAnswers,
@@ -88,32 +93,32 @@ fun NavGraph(
                         popUpTo("hasiltestscreen/{totalQuestions}/{correctAnswers}") { inclusive = true }
                     }
                 },
-                onDokterClicked = {
-                    navController.navigate("doctor")
-                },
-                navController = navController  // Menambahkan navController yang hilang
+                onDokterClicked = { navController.navigate("doctor") },
+                navController = navController,
+                viewModel = viewModel
             )
         }
 
-
-        // DoctorScreen
+        // Doctor Screen
         composable("doctor") {
             DoctorScreen(
                 onBackClicked = { navController.popBackStack() }
             )
         }
 
-        // ColorBlindInfoScreen
+        // Color Blind Info Screen
         composable("info") {
             ColorBlindInfoScreen(
                 onBackClicked = { navController.popBackStack() },
-                onInfoClicked = { category -> }
+                onInfoClicked = { category ->
+                    // Implementasi lebih lanjut untuk kategori
+                }
             )
         }
 
-        // RiwayatHasilScreen
+        // Riwayat Hasil Screen
         composable(
-            "riwayathasil/{totalQuestions}/{correctAnswers}",
+            route = "riwayathasil/{totalQuestions}/{correctAnswers}",
             arguments = listOf(
                 navArgument("totalQuestions") { type = NavType.IntType },
                 navArgument("correctAnswers") { type = NavType.IntType }
@@ -123,11 +128,31 @@ fun NavGraph(
             val correctAnswers = backStackEntry.arguments?.getInt("correctAnswers") ?: 0
 
             RiwayatHasilScreen(
+                navController = navController,
+                viewModel = viewModel,
                 totalQuestions = totalQuestions,
-                correctAnswers = correctAnswers,
-                navController = navController
+                correctAnswers = correctAnswers
             )
         }
 
+        // **Riwayat Detail Screen**
+        composable(
+            route = "riwayat_detail/{totalPercobaan}/{benar}/{salah}/{timestamp}",
+            arguments = listOf(
+                navArgument("totalPercobaan") { type = NavType.IntType },
+                navArgument("benar") { type = NavType.IntType },
+                navArgument("salah") { type = NavType.IntType },
+                navArgument("timestamp") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            RiwayatDetailScreen(
+                totalPercobaan = backStackEntry.arguments?.getInt("totalPercobaan") ?: 0,
+                benar = backStackEntry.arguments?.getInt("benar") ?: 0,
+                salah = backStackEntry.arguments?.getInt("salah") ?: 0,
+                timestamp = backStackEntry.arguments?.getLong("timestamp") ?: 0L,
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
     }
 }

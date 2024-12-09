@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cipta.colorwise.R
+import com.cipta.colorwise.viewmodel.ColorWiseViewModel
+import com.cipta.colorwise.data.HasilTes
 
 @Composable
 fun HasilTestScreen(
@@ -27,7 +30,8 @@ fun HasilTestScreen(
     correctAnswers: Int,
     onBackClicked: () -> Unit,
     onDokterClicked: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    viewModel: ColorWiseViewModel
 ) {
     val incorrectAnswers = totalQuestions - correctAnswers
 
@@ -158,26 +162,16 @@ fun HasilTestScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tombol ke Riwayat Hasil
-            Button(
-                onClick = {
-                    // Navigasi ke Riwayat Hasil dengan data yang diteruskan
-                    navController.navigate("riwayathasil/$totalQuestions/$correctAnswers")
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = SkyBlue),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth() // Mengisi lebar layar agar tombol cukup besar
-                    .padding(horizontal = 32.dp) // Padding kiri-kanan untuk keseimbangan
-                    .height(60.dp) // Tinggi tombol tetap proporsional
-            ) {
-                Text(
-                    text = "Lihat Riwayat Hasil",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1, // Membatasi teks ke satu baris
-                    textAlign = TextAlign.Center
+
+            // Simpan hasil tes ke database
+            LaunchedEffect(Unit) {
+                viewModel.addHasilTes(
+                    HasilTes(
+                        totalPercobaan = totalQuestions,
+                        benar = correctAnswers,
+                        salah = incorrectAnswers,
+                        timestamp = System.currentTimeMillis() // Gunakan waktu saat ini
+                    )
                 )
             }
         }
