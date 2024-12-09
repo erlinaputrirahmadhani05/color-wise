@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cipta.colorwise.ui.theme.ColorWiseTheme
+import com.cipta.colorwise.viewmodel.ColorWiseViewModel
 
 @Composable
 fun SolidButton(

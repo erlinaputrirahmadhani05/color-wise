@@ -3,11 +3,7 @@ package com.cipta.colorwise.ui.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -21,8 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cipta.colorwise.R
+import com.cipta.colorwise.viewmodel.ColorWiseViewModel
 
-// Warna tombol
+// Button Colors
 val OrangeBrown = Color(0xFFDF7132)
 val LightPink = Color(0xFFF472B6)
 val MintGreen = Color(0xFF34D399)
@@ -36,8 +33,8 @@ fun CustomBackground() {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF2C1E73), // Warna ungu gelap
-                        Color(0xFF512DA8)  // Warna ungu terang
+                        Color(0xFF2C1E73), // Dark purple
+                        Color(0xFF512DA8)  // Light purple
                     )
                 )
             )
@@ -56,36 +53,36 @@ fun SolidButtonWithIcon(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(60.dp), // Ukuran tombol
-        shape = RoundedCornerShape(12.dp), // Sudut membulat
+            .height(60.dp), // Button size
+        shape = RoundedCornerShape(12.dp), // Rounded corners
         colors = ButtonDefaults.buttonColors(containerColor = color),
-        elevation = ButtonDefaults.buttonElevation(8.dp) // Bayangan tombol
+        elevation = ButtonDefaults.buttonElevation(8.dp) // Button shadow
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 2.dp), // Padding di kiri
-            verticalAlignment = Alignment.CenterVertically, // Pusatkan ikon dan teks secara vertikal
-            horizontalArrangement = Arrangement.Start // Ikon dan teks mulai dari kiri
+                .padding(start = 2.dp), // Padding on the left
+            verticalAlignment = Alignment.CenterVertically, // Align icon and text vertically
+            horizontalArrangement = Arrangement.Start // Icon and text start from the left
         ) {
-            // Ikon dengan background putih
+            // Icon with white background
             Box(
                 modifier = Modifier
-                    .size(40.dp) // Ukuran ikon
-                    .background(Color.White, RoundedCornerShape(8.dp)) // Background putih dengan sudut membulat
-                    .padding(8.dp) // Padding di dalam ikon
+                    .size(40.dp) // Icon size
+                    .background(Color.White, RoundedCornerShape(8.dp)) // White background with rounded corners
+                    .padding(8.dp) // Padding inside the icon box
             ) {
                 Icon(
                     painter = painterResource(id = icon),
                     contentDescription = text,
-                    tint = Color.Black, // Warna ikon diubah jadi hitam agar kontras dengan background putih
-                    modifier = Modifier.size(24.dp) // Ukuran ikon di dalam box
+                    tint = Color.Black, // Icon color set to black for contrast with the white background
+                    modifier = Modifier.size(24.dp) // Icon size inside the box
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp)) // Jarak antara ikon dan teks
+            Spacer(modifier = Modifier.width(12.dp)) // Space between icon and text
 
-            // Teks tombol
+            // Button text
             Text(
                 text = text,
                 style = TextStyle(
@@ -93,12 +90,11 @@ fun SolidButtonWithIcon(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 ),
-                modifier = Modifier.align(Alignment.CenterVertically) // Posisikan teks di tengah vertikal
+                modifier = Modifier.align(Alignment.CenterVertically) // Vertically center the text
             )
         }
     }
 }
-
 
 @Composable
 fun HomeScreen(navController: NavController, viewModel: ColorWiseViewModel) {
@@ -114,17 +110,17 @@ fun HomeScreen(navController: NavController, viewModel: ColorWiseViewModel) {
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Logo di kiri atas
+            // Logo on the top left
             IconButton(onClick = { }) {
                 Icon(
                     painter = painterResource(id = R.drawable.logocolorwise),
-                    contentDescription = "Logo Color Wise",
+                    contentDescription = "Color Wise Logo",
                     tint = Color.Unspecified,
                     modifier = Modifier.size(80.dp)
                 )
             }
 
-            // Tombol Riwayat Hasil
+            // Result History Button
             Button(
                 onClick = {
                     val totalQuestions = 10
@@ -137,7 +133,7 @@ fun HomeScreen(navController: NavController, viewModel: ColorWiseViewModel) {
             ) {
                 Text(
                     text = "Riwayat Hasil",
-                    style = TextStyle( // Menggunakan TextStyle
+                    style = TextStyle( // Use TextStyle
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -153,48 +149,48 @@ fun HomeScreen(navController: NavController, viewModel: ColorWiseViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Teks Halo, Nama
+            // Hello, Name text
             Text(
-                text = "Halo, ${userName ?: "Nama"}!",
-                style = TextStyle( // Gunakan TextStyle
+                text = "Hello, ${userName ?: "Name"}!",
+                style = TextStyle( // Use TextStyle
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White
                 )
             )
 
-            Spacer(modifier = Modifier.height(32.dp)) // Jarak antara teks dan tombol pertama
+            Spacer(modifier = Modifier.height(32.dp)) // Space between text and first button
 
-            // TES MATA Button
+            // EYE TEST Button
             SolidButtonWithIcon(
                 text = "TES MATA",
                 color = OrangeBrown,
-                icon = R.drawable.eye, // Ganti dengan ikon yang sesuai
+                icon = R.drawable.eye, // Replace with appropriate icon
                 onClick = { navController.navigate("splashtest") }
             )
 
-            Spacer(modifier = Modifier.height(24.dp)) // Jarak lebih besar antar tombol
+            Spacer(modifier = Modifier.height(24.dp)) // Larger space between buttons
 
-            // DOKTER Button
+            // DOCTOR Button
             SolidButtonWithIcon(
                 text = "DOKTER",
                 color = LightPink,
-                icon = R.drawable.doctor, // Ganti dengan ikon yang sesuai
+                icon = R.drawable.doctor, // Replace with appropriate icon
                 onClick = { navController.navigate("doctor") }
             )
 
-            Spacer(modifier = Modifier.height(24.dp)) // Jarak lebih besar antar tombol
+            Spacer(modifier = Modifier.height(24.dp)) // Larger space between buttons
 
-            // INFORMASI BUTA WARNA Button
+            // COLOR BLIND INFORMATION Button
             SolidButtonWithIcon(
                 text = "INFORMASI BUTA WARNA",
                 color = MintGreen,
-                icon = R.drawable.info, // Ganti dengan ikon yang sesuai
+                icon = R.drawable.info, // Replace with appropriate icon
                 onClick = { navController.navigate("info") }
             )
         }
 
-        // Teks ColorWise dan Garis Horizontal
+        // ColorWise Text and Horizontal Line
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -212,7 +208,7 @@ fun HomeScreen(navController: NavController, viewModel: ColorWiseViewModel) {
                 HorizontalLine(
                     color = Color.White,
                     thickness = 2.dp,
-                    widthFraction = 0.5f, // Garis horizontal lebih pendek
+                    widthFraction = 0.5f, // Shorter horizontal line
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }

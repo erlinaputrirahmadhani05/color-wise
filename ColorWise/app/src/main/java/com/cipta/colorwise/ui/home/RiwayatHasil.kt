@@ -2,18 +2,26 @@ package com.cipta.colorwise.ui.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,173 +29,144 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cipta.colorwise.R
+import com.cipta.colorwise.viewmodel.ColorWiseViewModel
 
 val RedOrange = Color(0xFFF94F52)
 val PurpleColor = Color(0xFF1D0D62)
 
 @Composable
 fun RiwayatHasilScreen(
+    navController: NavController,
+    viewModel: ColorWiseViewModel,
     totalQuestions: Int,
-    correctAnswers: Int,
-    navController: NavController
+    correctAnswers: Int
 ) {
+    val hasilTesList by viewModel.hasilTesList.collectAsState(emptyList())
     val incorrectAnswers = totalQuestions - correctAnswers
 
-
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PurpleColor),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+            .background(PurpleColor)
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-            ) {
-                // Pastikan gambar yang digunakan memiliki transparansi
-                Image(
-                    painter = painterResource(id = R.drawable.user), // Ganti dengan gambar transparan
-                    contentDescription = "logo background",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape) // Membuat gambar berbentuk lingkaran
-                )
-                Box(modifier = Modifier.align(Alignment.Center)) {
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Nama Pengguna", // Ganti dengan nama pengguna yang sebenarnya
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-//
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White,       // Warna putih penuh di atas
-                            Color.White.copy(alpha = 0.7f), // Putih dengan sedikit transparansi
-                            Color.Transparent  // Transparansi penuh di bawah
-                        ),
-                        startY = 0f,          // Awal gradasi (di bagian atas)
-                        endY = 500f           // Akhir gradasi (lebih jauh ke bawah)
-                    ),
-                    shape = RoundedCornerShape(24.dp) // Bentuk sudut melengkung
-                )
-                .padding(vertical = 24.dp, horizontal = 16.dp) // Memberikan ruang dalam
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(18.dp)
-            ) {
-                ScoreItemWithImage(
-                    label = "TOTAL PERCOBAAN",
-                    value = totalQuestions.toString(),
-                    iconRes = R.drawable.all
-                )
-                ScoreItemWithImage(
-                    label = "BENAR",
-                    value = correctAnswers.toString(),
-                    isCorrect = true,
-                    iconRes = R.drawable.benar
-                )
-                ScoreItemWithImage(
-                    label = "SALAH",
-                    value = incorrectAnswers.toString(),
-                    isCorrect = false,
-                    iconRes = R.drawable.salah
-                )
-            }
-        }
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 80.dp) // Menambahkan padding bawah agar tombol Back tidak tertutup
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.BottomCenter
         ) {
-            Button(
-                onClick = {
-                    navController.popBackStack()
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = RedOrange),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-                    .height(60.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(4.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            color = RedOrange,
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+            if (hasilTesList.isEmpty()) {
+                item {
                     Text(
-                        text = "Back",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        text = "Belum ada data riwayat.",
+                        color = Color.White,
+                        fontSize = 18.sp
+                    )
+                }
+            } else {
+                items(hasilTesList.size) { index ->
+                    val hasil = hasilTesList[index]
+                    RiwayatHasilItem(
+                        totalPercobaan = hasil.totalPercobaan,
+                        benar = hasil.benar,
+                        salah = hasil.salah,
+                        timestamp = hasil.timestamp,
+                        onClick = {
+                            // Navigasi ke detail
+                            navController.navigate(
+                                "riwayat_detail/${hasil.totalPercobaan}/${hasil.benar}/${hasil.salah}/${hasil.timestamp}"
+                            )
+                        },
+                        onDelete = {
+                            // Hapus data dari ViewModel
+                            viewModel.deleteHasil(hasil.id)
+                        }
                     )
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Tombol Kembali
+        Button(
+            onClick = { navController.popBackStack() },
+            colors = ButtonDefaults.buttonColors(containerColor = RedOrange),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+                .height(50.dp)
+                .align(Alignment.BottomCenter), // Tombol ditempatkan di bagian bawah layar
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(
+                text = "Back",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
     }
 }
+
+
 @Composable
-fun ScoreItemWithImage(
-    label: String,
-    value: String,
-    isCorrect: Boolean = true,
-    iconRes: Int
+fun RiwayatHasilItem(
+    totalPercobaan: Int,
+    benar: Int,
+    salah: Int,
+    timestamp: Long,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
 ) {
+    val formattedDate = android.text.format.DateFormat.format("dd MMM yyyy, HH:mm", timestamp).toString()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
-            .padding(vertical = 16.dp)
-            .background(Color.White, RoundedCornerShape(16.dp)), // White background for the list item
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 8.dp)
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = "$label Icon",
-                modifier = Modifier.size(36.dp)
-            )
-            Spacer(modifier = Modifier.width(18.dp))
+        Column {
             Text(
-                text = label,
+                text = "Tanggal: $formattedDate",
                 color = Color.Black,
-                fontSize = 24.sp,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "Percobaan: $totalPercobaan",
+                color = Color.Black,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
         }
-        Text(
-            text = value,
-            color = if (isCorrect) Color(0xFF000000) else Color(0xFF000000),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = "Benar: $benar",
+                color = Color(0xFF34D399),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Salah: $salah",
+                color = Color(0xFFF87171),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            // Tombol Hapus
+            IconButton(onClick = { onDelete() }) { // Panggil fungsi onDelete saat tombol ditekan
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Hapus",
+                    tint = Color.Red)
+
+            }
+        }
     }
 }

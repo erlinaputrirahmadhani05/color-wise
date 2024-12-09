@@ -13,11 +13,11 @@ interface QuestionDao {
     fun getPagedQuestions(): PagingSource<Int, QuestionEntity>
 
     // Query untuk mendapatkan ID soal secara acak (jika diperlukan tanpa paging)
-    @Query("SELECT id FROM questions ORDER BY RANDOM() LIMIT 12")
+    @Query("SELECT id FROM questions ORDER BY RANDOM() LIMIT 10")
     suspend fun getRandomQuestions(): List<Int>
 
     // Query untuk mendapatkan soal berdasarkan ID
-    @Query("SELECT * FROM questions WHERE id = :id LIMIT 2")
+    @Query("SELECT * FROM questions WHERE id = :id LIMIT 1")
     suspend fun getQuestionById(id: Int): QuestionEntity
 
     // Query untuk menyisipkan data baru
