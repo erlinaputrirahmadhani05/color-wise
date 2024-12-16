@@ -12,4 +12,7 @@ interface UserDao {
 
     @Query("SELECT * FROM user_table")
     suspend fun getAllUsers(): List<User>
+
+    @Query("SELECT * FROM user_table ORDER BY id DESC LIMIT 1")
+    suspend fun getLastUser(): User? // Ambil user terbaru berdasarkan ID tertinggi
 }

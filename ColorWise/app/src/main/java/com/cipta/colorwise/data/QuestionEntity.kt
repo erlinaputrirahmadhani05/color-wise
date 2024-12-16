@@ -22,7 +22,6 @@ data class HasilTes(
 
 @Entity(tableName = "user_table")
 data class User(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0, // Primary key otomatis
     val userName: String
 )

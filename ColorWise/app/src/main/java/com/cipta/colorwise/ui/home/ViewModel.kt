@@ -5,45 +5,30 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.cipta.colorwise.data.AppDatabase
 import com.cipta.colorwise.data.HasilTes
-import com.cipta.colorwise.data.UserPreferences
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import android.util.Log
 import com.cipta.colorwise.data.HasilTesDao
 import com.cipta.colorwise.data.User
 import com.cipta.colorwise.data.UserDao
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import android.util.Log
 
 class ColorWiseViewModel(application: Application) : AndroidViewModel(application) {
 
     // Bagian untuk nama pengguna
-    private val userPreferences = UserPreferences(application)
-    private val _userName = MutableStateFlow<String?>(null)
+    private val _userName = MutableStateFlow<String?>("User belum diinput")
     val userName: StateFlow<String?> = _userName
 
     // DAO dan database
-    private var database: AppDatabase = AppDatabase.getDatabase(application)
-    private var hasilTesDao: HasilTesDao = database.hasilTesDao()
-    private var userDao: UserDao = database.userDao()
+    private val database: AppDatabase = AppDatabase.getDatabase(application)
+    private val hasilTesDao: HasilTesDao = database.hasilTesDao()
+    private val userDao: UserDao = database.userDao()
 
     init {
-        // Ambil nama pengguna dari UserPreferences dan simpan ke _userName
-        viewModelScope.launch {
-            userPreferences.userName.collect { name ->
-                _userName.value = name
-            }
-        }
-
-        // Ambil data hasil tes saat ViewModel diinisialisasi
+        loadLastUser()
         loadHasilTes()
-    }
-
-    // Fungsi untuk mengubah nama pengguna
-    fun setUserName(name: String) {
-        _userName.value = name
-        saveUserName(name)
     }
 
     // Bagian untuk hasil tes
@@ -93,28 +78,50 @@ class ColorWiseViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    // Tambahkan user baru dan langsung perbarui _userName
     fun insertUser(userName: String) {
         viewModelScope.launch {
-            userDao.insertUser(User(userName = userName))  // Memanggil insertUser dari userDao
+            try {
+                withContext(Dispatchers.IO) {
+                    userDao.insertUser(User(userName = userName))
+                }
+                _userName.value = userName // Perbarui stateFlow dengan nama user baru
+            } catch (e: Exception) {
+                Log.e("ColorWiseViewModel", "Error inserting user: ${e.message}")
+            }
         }
     }
 
+    // Ambil semua user dari database
     fun getAllUsers(onSuccess: (List<User>) -> Unit) {
         viewModelScope.launch {
             try {
-                // Panggil userDao.getAllUsers() untuk mendapatkan data pengguna dari database
-                val users = userDao.getAllUsers()  // Memanggil fungsi dari userDao
-                onSuccess(users)  // Mengirim data yang berhasil diambil ke callback
+                val users = withContext(Dispatchers.IO) {
+                    userDao.getAllUsers()
+                }
+                onSuccess(users)
             } catch (e: Exception) {
                 Log.e("ColorWiseViewModel", "Error getting users: ${e.message}")
             }
         }
     }
 
-    // Fungsi untuk menyimpan nama pengguna ke UserPreferences
-    private fun saveUserName(name: String) {
+    // Ambil user terakhir dari database
+    private fun loadLastUser() {
         viewModelScope.launch {
-            userPreferences.saveUserName(name)
+            try {
+                val lastUser = withContext(Dispatchers.IO) { userDao.getLastUser() }
+                _userName.value = lastUser?.userName ?: "User belum diinput"
+            } catch (e: Exception) {
+                Log.e("ColorWiseViewModel", "Error loading last user: ${e.message}")
+            }
         }
     }
+
+    suspend fun getLastUser(): User? {
+        return withContext(Dispatchers.IO) {
+            userDao.getLastUser()
+        }
+    }
+
 }
