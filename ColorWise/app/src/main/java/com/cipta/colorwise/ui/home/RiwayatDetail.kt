@@ -40,15 +40,13 @@ fun RiwayatDetailScreen(
     navController: NavController,
     viewModel: ColorWiseViewModel
 ) {
-    val userName by viewModel.userName.collectAsState()
     val formattedDate = android.text.format.DateFormat.format("dd MMM yyyy, HH:mm", timestamp).toString()
-    var userList by remember { mutableStateOf(emptyList<User>()) } // Perbaikan di sini
+    var lastUser by remember { mutableStateOf<User?>(null) } // State untuk menyimpan user terakhir
 
-    // Ambil data pengguna dari ViewModel
+    // Ambil user terakhir dari database
     LaunchedEffect(Unit) {
-        viewModel.getAllUsers { users ->
-            userList = users // Simpan hasil ke dalam userList
-        }
+        val user = viewModel.getLastUser()
+        lastUser = user
     }
 
     Column(
@@ -59,7 +57,7 @@ fun RiwayatDetailScreen(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Header
+        // Header: Menampilkan user terakhir yang diinput
         Image(
             painter = painterResource(id = R.drawable.user),
             contentDescription = "User Avatar",
@@ -68,8 +66,9 @@ fun RiwayatDetailScreen(
                 .clip(CircleShape)
         )
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
-            text = "${userName ?: "Nama belum diisi"}", // Menghindari NullPointerException
+            text = lastUser?.userName ?: "Nama belum tersedia", // Nama user terakhir
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -90,20 +89,6 @@ fun RiwayatDetailScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
-        // LazyColumn Menampilkan UserList
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .weight(1f) // Sesuaikan ukuran dengan layar
-        ) {
-            items(userList) { user -> // Pastikan `userList` adalah List<User>
-                UserItem(user) // Panggil UserItem dengan objek User
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Tombol Kembali
         Button(
@@ -153,22 +138,3 @@ fun DetailItem(label: String, value: String, icon: Int) {
     }
 }
 
-@Composable
-fun UserItem(user: User) { // Pastikan parameter di sini adalah User
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .background(Color.LightGray, RoundedCornerShape(12.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = user.userName, // Pastikan `userName` adalah properti dari objek `User`
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}

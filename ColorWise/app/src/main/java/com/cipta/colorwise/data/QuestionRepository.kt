@@ -40,5 +40,13 @@ class QuestionRepository(private val context: Context) {
             userDao.getAllUsers() // Memanggil userDao untuk mendapatkan daftar pengguna
         }
     }
+
+    // Fungsi untuk menyimpan data pengguna
+    suspend fun saveUser(name: String) {
+        withContext(Dispatchers.IO) {
+            userDao.insertUser(User(userName = name))
+        }
+    }
+
 }
 

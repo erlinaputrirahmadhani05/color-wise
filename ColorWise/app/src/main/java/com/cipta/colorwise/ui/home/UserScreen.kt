@@ -116,8 +116,7 @@ fun InputScreen(onNextClicked: () -> Unit, viewModel: ColorWiseViewModel = viewM
                         isNameEmpty = true
                         errorMessage = "Nama harus diisi."
                     } else {
-                        // Simpan nama pengguna ke ViewModel dan SharedPreferences
-                        viewModel.setUserName(name.value.text)
+                        viewModel.insertUser(name.value.text) // Panggil insertUser
                         onNextClicked()
                     }
                 },
